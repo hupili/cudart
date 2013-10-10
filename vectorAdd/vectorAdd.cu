@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <cuda_runtime.h>
 
 __global__ void vectorAdd(const float *a, const float *b, float *c, int numElements)
 {
