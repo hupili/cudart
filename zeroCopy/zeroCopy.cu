@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 			break;
 		}
 	}
-	printf("vectorAdd %s\n\n", passed ? "passed" : "failed");
+	printf("zeroCopy %s\n", passed ? "passed" : "failed");
 	cudaFreeHost(h_a);
 	cudaFreeHost(h_b);
 	cudaFreeHost(h_c);
