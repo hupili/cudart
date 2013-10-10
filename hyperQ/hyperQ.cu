@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <time.h>
 
 __global__ void hyperQ(clock_t num_clocks)
 {
