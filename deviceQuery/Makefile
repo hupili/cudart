@@ -1,4 +1,4 @@
-NVCC=nvcc -arch=sm_35
+NVCC=nvcc
 
 deviceQuery: deviceQuery.o
 	$(NVCC) -o $@ $^
