@@ -23,3 +23,8 @@ vectorAdd
 ---------
 
 This sample adds two vectors of float.
+
+hyperQ
+------
+
+This sample uses multiple streams to exploit the HyperQ technology.
