@@ -55,7 +55,8 @@ int main(int argc, char *argv[])
 		float expected = h_a[i] + h_b[i];
 		if (fabs(actual - expected) > 1e-5)
 		{
-			fprintf(stderr, "h_c[%d] = %f, ref = %f\n", i, actual, expected);
+			printf("h_c[%d] = %f, ref = %f\n", i, actual, expected);
+			break;
 		}
 	}
 
