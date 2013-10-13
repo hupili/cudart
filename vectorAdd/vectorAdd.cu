@@ -9,7 +9,7 @@ __global__ void vectorAdd(const float *a, const float *b, float *c, int numEleme
 	}
 }
 
-int main()
+int main(int argc, char *argv[])
 {
 	int numElements = 50000;
 
