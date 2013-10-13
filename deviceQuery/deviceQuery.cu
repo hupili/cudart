@@ -2,18 +2,21 @@
 
 int main(int argc, char *argv[])
 {
+	// Get the number of devices.
 	int deviceCount;
 	cudaGetDeviceCount(&deviceCount);
+	printf("deviceCount: %d\n", deviceCount);
+
+	// Get the properties of device 0.
 	cudaDeviceProp deviceProp;
 	cudaGetDeviceProperties(&deviceProp, 0);
-	printf("deviceCount: %d\n", deviceCount);
 	printf("name: %s\n", deviceProp.name);
 	printf("major: %d\n", deviceProp.major);
 	printf("minor: %d\n", deviceProp.minor);
 	printf("multiProcessorCount: %d\n", deviceProp.multiProcessorCount);
 	printf("totalGlobalMem: %lu B = %lu MB\n", deviceProp.totalGlobalMem, deviceProp.totalGlobalMem / 1048576);
-	printf("sharedMemPerBlock: %d B = %d KB\n", deviceProp.sharedMemPerBlock, deviceProp.sharedMemPerBlock / 1024);
-	printf("totalConstMem: %d B = %d KB\n", deviceProp.totalConstMem, deviceProp.totalConstMem / 1024);
+	printf("sharedMemPerBlock: %lu B = %lu KB\n", deviceProp.sharedMemPerBlock, deviceProp.sharedMemPerBlock / 1024);
+	printf("totalConstMem: %lu B = %lu KB\n", deviceProp.totalConstMem, deviceProp.totalConstMem / 1024);
 	printf("regsPerBlock: %d\n", deviceProp.regsPerBlock);
 	printf("ECCEnabled: %d\n", deviceProp.ECCEnabled);
 	printf("kernelExecTimeoutEnabled: %d\n", deviceProp.kernelExecTimeoutEnabled);
