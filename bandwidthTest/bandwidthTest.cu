@@ -70,8 +70,9 @@ int main(int argc, char* argv[])
 		shrDeltaT();
 		for (int i = 0; i < iteration; ++i)
 		{
-			cudaMemcpy(d_p, h_p, size, cudaMemcpyHostToDevice);
+			cudaMemcpyAsync(d_p, h_p, size, cudaMemcpyHostToDevice);
 		}
+		cudaDeviceSynchronize();
 		time = shrDeltaT();
 		printf("%lu,%s,%s,%.0f\n", size, "pinned", "HtoD", totalSizeInMB / time);
 
@@ -79,8 +80,9 @@ int main(int argc, char* argv[])
 		shrDeltaT();
 		for (int i = 0; i < iteration; ++i)
 		{
-			cudaMemcpy(h_p, d_p, size, cudaMemcpyDeviceToHost);
+			cudaMemcpyAsync(h_p, d_p, size, cudaMemcpyDeviceToHost);
 		}
+		cudaDeviceSynchronize();
 		time = shrDeltaT();
 		printf("%lu,%s,%s,%.0f\n", size, "pinned", "DtoH", totalSizeInMB / time);
 
