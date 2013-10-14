@@ -47,18 +47,18 @@ int main(int argc, char* argv[])
 		{
 			cudaMemcpy(d_p, h_p, size, cudaMemcpyHostToDevice);
 		}
-		cudaDeviceSynchronize();
 		time = shrDeltaT();
 		printf("%lu,%s,%s,%.0f\n", size, "pageable", "HtoD", totalSizeInMB / time);
+
 		// Test device-to-host bandwidth.
 		shrDeltaT();
 		for (int i = 0; i < iteration; ++i)
 		{
 			cudaMemcpy(h_p, d_p, size, cudaMemcpyDeviceToHost);
 		}
-		cudaDeviceSynchronize();
 		time = shrDeltaT();
 		printf("%lu,%s,%s,%.0f\n", size, "pageable", "DtoH", totalSizeInMB / time);
+
 		// Deallocate pageable h_p in host memory.
 		free(h_p);
 
@@ -74,6 +74,7 @@ int main(int argc, char* argv[])
 		cudaDeviceSynchronize();
 		time = shrDeltaT();
 		printf("%lu,%s,%s,%.0f\n", size, "pinned", "HtoD", totalSizeInMB / time);
+
 		// Test device-to-host bandwidth.
 		shrDeltaT();
 		for (int i = 0; i < iteration; ++i)
@@ -89,4 +90,7 @@ int main(int argc, char* argv[])
 		// Deallocate d_p in device memory.
 		cudaFree(d_p);
 	}
+
+	// Cleanup.
+	cudaDeviceReset();
 }
