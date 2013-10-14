@@ -32,6 +32,7 @@ template <int BLOCK_SIZE> __global__ void matrixMul(float *C, float *A, float *B
 
 int main(int argc, char **argv)
 {
+	// Initialize constants.
 	const int block_size = 32;
 	dim3 dimsA(5 * 2 * block_size, 5 * 2 * block_size, 1);
 	dim3 dimsB(5 * 4 * block_size, 5 * 2 * block_size, 1);
@@ -42,9 +43,13 @@ int main(int argc, char **argv)
 	unsigned int mem_size_A = sizeof(float) * size_A;
 	unsigned int mem_size_B = sizeof(float) * size_B;
 	unsigned int mem_size_C = sizeof(float) * size_C;
+
+	// Allocate matrices a, b and c in host memory.
 	float *h_A = (float *)malloc(mem_size_A);
 	float *h_B = (float *)malloc(mem_size_B);
 	float *h_C = (float *)malloc(mem_size_C);
+
+	// Initialize matrices a and b.
 	for (int i = 0; i < size_A; ++i)
 	{
 		h_A[i] = 1.0f;
@@ -54,45 +59,73 @@ int main(int argc, char **argv)
 	{
 		h_B[i] = valB;
 	}
+
+	// Allocate matrices a, b and c in device memory.
 	float *d_A, *d_B, *d_C;
 	cudaMalloc((void **)&d_A, mem_size_A);
 	cudaMalloc((void **)&d_B, mem_size_B);
 	cudaMalloc((void **)&d_C, mem_size_C);
+
+	// Copy matrices a and b from host memory to device memory.
 	cudaMemcpy(d_A, h_A, mem_size_A, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_B, h_B, mem_size_B, cudaMemcpyHostToDevice);
+
+	// Determine the number of threads per block and the number of blocks per grid.
 	dim3 threadsPerBlock(block_size, block_size);
 	dim3 blocksPerGrid(dimsB.x / threadsPerBlock.x, dimsA.y / threadsPerBlock.y);
+
+	// Invoke the kernel on device asynchronously.
 	matrixMul<block_size><<<blocksPerGrid, threadsPerBlock>>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
+
+	// Wait for the device to finish.
 	cudaDeviceSynchronize();
 
-	cudaEvent_t start;
-	cudaEvent_t stop;
+	// Create events to record timing data.
+	cudaEvent_t start, stop;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
+
+	// Record an event in stream 0 before kernel invocations.
 	cudaEventRecord(start, 0);
+
+	// Invoke the kernel for a number of iterations.
 	int nIter = 300;
 	for (int i = 0; i < nIter; ++i)
 	{
 		matrixMul<block_size><<<blocksPerGrid, threadsPerBlock>>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
 	}
+
+	// Record an event in stream 0 after kernel invocations.
 	cudaEventRecord(stop, 0);
+
+	// Wait for the event to complete.
 	cudaEventSynchronize(stop);
+
+	// Compute the elapsed time between two events.
 	float msecTotal;
 	cudaEventElapsedTime(&msecTotal, start, stop);
+
+	// Compute and print some performance metrics.
 	float msecPerMatrixMul = msecTotal / nIter;
-	double flopsPerMatrixMul = 2.0 * (double)dimsA.x * (double)dimsA.y * (double)dimsB.x;
-	double gigaFlops = (flopsPerMatrixMul * 1.0e-9f) / (msecPerMatrixMul / 1000.0f);
+	float flopsPerMatrixMul = 2.0 * dimsA.x * dimsA.y * dimsB.x;
+	float gigaFlops = (flopsPerMatrixMul * 1e-9f) / (msecPerMatrixMul / 1000.0f);
 	printf("Performance= %.2f GFlop/s, Time= %.3f msec, Size= %.0f Ops, WorkgroupSize= %u threads/block\n", gigaFlops, msecPerMatrixMul, flopsPerMatrixMul, threadsPerBlock.x * threadsPerBlock.y);
 
+	// Copy matrix c from device memory to host memory synchronously.
 	cudaMemcpy(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost);
+
+	// Validate the result.
 	for (int i = 0; i < dimsC.x * dimsC.y; ++i)
 	{
-		double ref = dimsA.x * valB;
-		if (fabs(h_C[i] - ref) / fabs(h_C[i]) / dimsA.x > 1.e-6)
+		float actual = h_C[i];
+		float expected = dimsA.x * valB;
+		if (fabs(actual - expected) / fabs(actual) / dimsA.x > 1e-7)
 		{
-			printf("Matrix[%05d]=%.8f, ref=%.8f\n", i, h_C[i], ref);
+			printf("h_C[%d]=%f, expected=%f\n", i, actual, expected);
 		}
 	}
+
+	// Cleanup.
 	cudaFree(d_A);
 	cudaFree(d_B);
 	cudaFree(d_C);
