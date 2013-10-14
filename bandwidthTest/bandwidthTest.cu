@@ -69,9 +69,8 @@ int main(int argc, char* argv[])
 		shrDeltaT();
 		for (int i = 0; i < iteration; ++i)
 		{
-			cudaMemcpyAsync(d_p, h_p, size, cudaMemcpyHostToDevice);
+			cudaMemcpy(d_p, h_p, size, cudaMemcpyHostToDevice);
 		}
-		cudaDeviceSynchronize();
 		time = shrDeltaT();
 		printf("%lu,%s,%s,%.0f\n", size, "pinned", "HtoD", totalSizeInMB / time);
 
@@ -79,9 +78,8 @@ int main(int argc, char* argv[])
 		shrDeltaT();
 		for (int i = 0; i < iteration; ++i)
 		{
-			cudaMemcpyAsync(h_p, d_p, size, cudaMemcpyDeviceToHost);
+			cudaMemcpy(h_p, d_p, size, cudaMemcpyDeviceToHost);
 		}
-		cudaDeviceSynchronize();
 		time = shrDeltaT();
 		printf("%lu,%s,%s,%.0f\n", size, "pinned", "DtoH", totalSizeInMB / time);
 		// Deallocate pinned h_p in host memory.
