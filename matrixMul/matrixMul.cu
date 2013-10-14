@@ -14,11 +14,18 @@ template <int BLOCK_SIZE> __global__ void matrixMul(float *C, float *A, float *B
 	float Csub = 0;
 	for (int a = aBegin, b = bBegin; a <= aEnd; a += aStep, b += bStep)
 	{
+		// Allocate blocks of data in shared memory.
 		__shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
 		__shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
+
+		// Copy a block of data from global memory to shared memory.
 		As[ty][tx] = A[a + wA * ty + tx];
 		Bs[ty][tx] = B[b + wB * ty + tx];
+
+		// Waits until all threads in the thread block have reached this point and all global and shared memory accesses made by these threads prior to __syncthreads() are visible to all threads in the block.
 		__syncthreads();
+
+// Unrolling is possible because BLOCK_SIZE is known at compile time.
 #pragma unroll
 		for (int k = 0; k < BLOCK_SIZE; ++k)
 		{
@@ -26,6 +33,8 @@ template <int BLOCK_SIZE> __global__ void matrixMul(float *C, float *A, float *B
 		}
 		__syncthreads();
 	}
+
+	// Save the result from shared memory to global memory.
 	int c = wB * BLOCK_SIZE * by + BLOCK_SIZE * bx;
 	C[c + wB * ty + tx] = Csub;
 }
