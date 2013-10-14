@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
 	// Initialize vectors a and b.
 	for (int i = 0; i < numElements; ++i)
 	{
-		h_a[i] = rand()/(float)RAND_MAX;
-		h_b[i] = rand()/(float)RAND_MAX;
+		h_a[i] = rand() / (float)RAND_MAX;
+		h_b[i] = rand() / (float)RAND_MAX;
 	}
 
 	// Allocate vectors a, b and c in device memory.
@@ -39,11 +39,11 @@ int main(int argc, char *argv[])
 	cudaMemcpy(d_b, h_b, size, cudaMemcpyHostToDevice);
 
 	// Determine the number of threads per block and the number of blocks per grid.
-	int threadsPerBlock = 256;
-	int blocksPerGrid = (numElements + threadsPerBlock - 1) / threadsPerBlock;
+	int numThreadsPerBlock = 256;
+	int numBlocksPerGrid = (numElements + numThreadsPerBlock - 1) / numThreadsPerBlock;
 
 	// Invoke the kernel on device asynchronously.
-	vectorAdd<<<blocksPerGrid, threadsPerBlock>>>(d_a, d_b, d_c, numElements);
+	vectorAdd<<<numBlocksPerGrid, numThreadsPerBlock>>>(d_a, d_b, d_c, numElements);
 
 	// Copy vector c from device memory to host memory synchronously.
 	cudaMemcpy(h_c, d_c, size, cudaMemcpyDeviceToHost);
