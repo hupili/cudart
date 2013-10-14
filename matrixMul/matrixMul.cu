@@ -89,8 +89,8 @@ int main(int argc, char **argv)
 	cudaEventRecord(start, 0);
 
 	// Invoke the kernel for a number of iterations.
-	int nIter = 300;
-	for (int i = 0; i < nIter; ++i)
+	int num_iterations = 300;
+	for (int i = 0; i < num_iterations; ++i)
 	{
 		matrixMul<block_size><<<blocksPerGrid, threadsPerBlock>>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
 	}
@@ -102,14 +102,11 @@ int main(int argc, char **argv)
 	cudaEventSynchronize(stop);
 
 	// Compute the elapsed time between two events.
-	float msecTotal;
-	cudaEventElapsedTime(&msecTotal, start, stop);
+	float elapsed;
+	cudaEventElapsedTime(&elapsed, start, stop);
 
-	// Compute and print some performance metrics.
-	float msecPerMatrixMul = msecTotal / nIter;
-	float flopsPerMatrixMul = 2.0 * dimsA.x * dimsA.y * dimsB.x;
-	float gigaFlops = (flopsPerMatrixMul * 1e-9f) / (msecPerMatrixMul / 1000.0f);
-	printf("Performance= %.2f GFlop/s, Time= %.3f msec, Size= %.0f Ops, WorkgroupSize= %u threads/block\n", gigaFlops, msecPerMatrixMul, flopsPerMatrixMul, threadsPerBlock.x * threadsPerBlock.y);
+	// Compute and print the GLOPS/s performance metric.
+	printf("%.2f GFLOP/s\n", (2 * dimsA.x * dimsA.y * dimsB.x * num_iterations * 1e-9f) / (elapsed / 1000.0f));
 
 	// Copy matrix c from device memory to host memory synchronously.
 	cudaMemcpy(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost);
