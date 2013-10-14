@@ -1,6 +1,6 @@
 #include <helper_cuda.h>
 
-__global__ void iota(const float *a)
+__global__ void iota(float *a)
 {
 	int i = blockDim.x * blockIdx.x + threadIdx.x;
 	a[i] = i;
