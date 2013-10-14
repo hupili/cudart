@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 
+// This function returns the current timestamp in seconds.
 double shrDeltaT()
 {
 	static struct timeval old_time;
@@ -82,6 +83,7 @@ int main(int argc, char* argv[])
 		}
 		time = shrDeltaT();
 		printf("%lu,%s,%s,%.0f\n", size, "pinned", "DtoH", totalSizeInMB / time);
+
 		// Deallocate pinned h_p in host memory.
 		cudaFreeHost(h_p);
 

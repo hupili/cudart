@@ -11,12 +11,12 @@ This sample adds two vectors of float.
 zeroCopy
 --------
 
-This sample uses zero copy to map a host pointer to a device pointer so that kernels can read and write directly to pinned system memory.
+This sample maps device pointers to pinned host memory so that kernels can directly read from and write to pinned host memory.
 
 bandwidthTest
 -------------
 
-This sample measures host to device and device to host copy bandwidth for pageable, page-locked and write-combined memory of transfer sizes 3KB, 15KB, 15MB and 100MB, and outputs them in CSV format.
+This sample measures host to device and device to host copy bandwidth for pageable and pinned memory of transfer sizes 3KB, 15KB, 15MB and 100MB, and outputs them in CSV format.
 
 matrixMul
 ---------
