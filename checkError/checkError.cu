@@ -21,7 +21,6 @@ int main(int argc, char *argv[])
 
 	// Invoke the kernel on device asynchronously.
 	iota<<<numBlocksPerGrid, numThreadsPerBlock>>>(d_a);
-	checkCudaErrors(cudaGetLastError());
 
 	// Cleanup.
 	checkCudaErrors(cudaFree(d_a));
