@@ -1,10 +1,10 @@
-NVCC=nvcc -arch=sm_35
+CC=nvcc -arch=sm_35
 
 bandwidthTest: bandwidthTest.o
-	$(NVCC) -o $@ $^
+	$(CC) -o $@ $^
 
 bandwidthTest.o: bandwidthTest.cu
-	$(NVCC) -o $@ $< -c
+	$(CC) -o $@ $< -c
 
 clean:
 	rm -f bandwidthTest bandwidthTest.o

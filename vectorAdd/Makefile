@@ -1,10 +1,10 @@
-NVCC=nvcc -arch=sm_35
+CC=nvcc -arch=sm_35
 
 vectorAdd: vectorAdd.o
-	$(NVCC) -o $@ $^
+	$(CC) -o $@ $^
 
 vectorAdd.o: vectorAdd.cu
-	$(NVCC) -o $@ $< -c
+	$(CC) -o $@ $< -c
 
 clean:
 	rm -f vectorAdd vectorAdd.o

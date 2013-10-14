@@ -1,10 +1,10 @@
-NVCC=nvcc
+CC=nvcc
 
 deviceQuery: deviceQuery.o
-	$(NVCC) -o $@ $^
+	$(CC) -o $@ $^
 
 deviceQuery.o: deviceQuery.cu
-	$(NVCC) -o $@ $< -c
+	$(CC) -o $@ $< -c
 
 clean:
 	rm -f deviceQuery deviceQuery.o

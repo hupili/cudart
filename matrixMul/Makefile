@@ -1,10 +1,10 @@
-NVCC=nvcc -arch=sm_35
+CC=nvcc -arch=sm_35
 
 matrixMul: matrixMul.o
-	$(NVCC) -o $@ $^
+	$(CC) -o $@ $^
 
 matrixMul.o: matrixMul.cu
-	$(NVCC) -o $@ $< -c
+	$(CC) -o $@ $< -c
 
 clean:
 	rm -f matrixMul matrixMul.o

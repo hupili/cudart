@@ -1,10 +1,10 @@
-NVCC=nvcc -arch=sm_35
+CC=nvcc -arch=sm_35
 
 hyperQ: hyperQ.o
-	$(NVCC) -o $@ $^
+	$(CC) -o $@ $^
 
 hyperQ.o: hyperQ.cu
-	$(NVCC) -o $@ $< -c
+	$(CC) -o $@ $< -c
 
 clean:
 	rm -f hyperQ hyperQ.o
