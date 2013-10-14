@@ -8,7 +8,7 @@ __global__ void iota(float *a)
 
 int main(int argc, char *argv[])
 {
-	int numElements = 1e+10;
+	int numElements = 1e+8;
 	size_t size = sizeof(float) * numElements;
 
 	// Allocate vector a in device memory.
