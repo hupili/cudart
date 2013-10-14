@@ -16,7 +16,12 @@ This sample maps device pointers to pinned host memory so that kernels can direc
 bandwidthTest
 -------------
 
-This sample measures host to device and device to host copy bandwidth for pageable and pinned memory of transfer sizes 3KB, 15KB, 15MB and 100MB, and outputs them in CSV format.
+This sample measures host-to-device and device-to-host bandwidth via PCIe for pageable and pinned memory of four transfer sizes of 3KB, 15KB, 15MB and 100MB, and outputs them in CSV format.
+
+checkError
+----------
+
+This sample checks the return value of every runtime API.
 
 matrixMul
 ---------
