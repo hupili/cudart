@@ -10,6 +10,9 @@ int main(int argc, char *argv[])
 	// Get the properties of device 0.
 	cudaDeviceProp deviceProp;
 	cudaGetDeviceProperties(&deviceProp, 0);
+
+	// Print some properties.
+	// Refer to driver_types.h for a complete list of properties.
 	printf("name: %s\n", deviceProp.name);
 	printf("major: %d\n", deviceProp.major);
 	printf("minor: %d\n", deviceProp.minor);
