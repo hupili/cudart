@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 	cudaEventElapsedTime(&elapsed, start, stop);
 
 	// Compute and print the GLOPS/s performance metric.
-	printf("%.2f GFLOP/s\n", (2 * dimsA.x * dimsA.y * dimsB.x * num_iterations * 1e-9f) / (elapsed / 1000.0f));
+	printf("%.2f GFLOP/s\n", (2.0f * dimsA.x * dimsA.y * dimsB.x * num_iterations * 1e-9f) / (elapsed / 1000.0f));
 
 	// Copy matrix c from device memory to host memory synchronously.
 	cudaMemcpy(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost);
