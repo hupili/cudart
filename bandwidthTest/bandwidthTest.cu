@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 	const size_t sizes[n] = { 3 << 10, 15 << 10, 15 << 20, 100 << 20 };
 
 	// Initialize the number of transfer iterations, i.e. 60K, 60K, 300 and 30 iterations, respectively.
-	const int iterations[n] = { 60000, 60000, 300, 30 };
+	const size_t iterations[n] = { 60000, 60000, 300, 30 };
 
 	// Print header in CSV format.
 	printf("size (B),memory,direction,bandwidth (MB/s)\n");
@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 	{
 		// Calculate the total transfer size.
 		const size_t size = sizes[s];
-		const int iteration = iterations[s];
+		const size_t iteration = iterations[s];
 		const double totalSizeInMB = (double)size * iteration / (1 << 20);
 		double time;
 
