@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 	const int iterations[n] = { 60000, 60000, 300, 30 };
 
 	// Print header in CSV format.
-	printf("size (B),memory,direction,time (s),bandwidth (MB/s)\n");
+	printf("size (B),memory,direction,bandwidth (MB/s)\n");
 
 	// Loop through the 4 transfer sizes.
 	for (int s = 0; s < n; ++s)
