@@ -4,7 +4,7 @@ atomicAdd: atomicAdd.o
 	$(CC) -o $@ $^
 
 atomicAdd.o: atomicAdd.cu
-	$(CC) -o $@ $< -c -I~/cuda-5.5/samples/common/inc
+	$(CC) -o $@ $< -c
 
 clean:
 	rm -f atomicAdd atomicAdd.o
