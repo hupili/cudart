@@ -53,9 +53,9 @@ int main(int argc, char *argv[])
 	{
 		float actual = h_c[i];
 		float expected = h_a[i] + h_b[i];
-		if (fabs(actual - expected) > 1e-5)
+		if (fabs(actual - expected) > 1e-7)
 		{
-			printf("h_c[%d] = %f, ref = %f\n", i, actual, expected);
+			printf("h_c[%d] = %f, expected = %f\n", i, actual, expected);
 			break;
 		}
 	}
