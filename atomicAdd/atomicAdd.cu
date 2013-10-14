@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <assert.h>
 
 __constant__ int inc;
 __device__ int sum;
@@ -6,6 +7,7 @@ __device__ int sum;
 __global__ void atomicAdd()
 {
 	int s = atomicAdd(&sum, inc);
+	assert((s - 1) % inc == 0);
 	if (threadIdx.x == 0)
 	{
 		printf("blockIdx.x = %d, sum = %d\n", blockIdx.x, s);
