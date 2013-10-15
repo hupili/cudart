@@ -57,9 +57,6 @@ int main(int argc, char *argv[])
 
 		// Deallocate the temporary device memory.
 		cudaFree(d);
-
-		// Cleanup.
-		cudaDeviceReset();
 	}
 
 	for (int i = 0; i < numElements; ++i)
@@ -74,5 +71,10 @@ int main(int argc, char *argv[])
 	}
 
 	// Cleanup.
+	for (int i = 0; i < numDevices; ++i)
+	{
+		cudaSetDevice(i);
+		cudaDeviceReset();
+	}
 	free(data);
 }
