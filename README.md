@@ -6,7 +6,7 @@ All samples make use of the runtime API.
 vectorAdd
 ---------
 
-This sample adds two vectors of float.
+This sample adds two vectors of floats.
 
 zeroCopy
 --------
