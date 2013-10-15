@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <mpi.h>
 
-__global__ void square(float *d)
+__global__ void square(int *d)
 {
 	int i = blockDim.x * blockIdx.x + threadIdx.x;
 	d[i] = d[i] * d[i];
@@ -17,6 +17,10 @@ int main(int argc, char *argv[])
 	MPI_Comm_size(MPI_COMM_WORLD, &commSize);
 	MPI_Comm_rank(MPI_COMM_WORLD, &commRank);
 
+	// Get the number of CUDA devices.
+	int numDevices;
+	cudaGetDeviceCount(&numDevices);
+
 	// Initialize constants.
 	int numThreadsPerBlock = 256;
 	int numBlocksPerGrid = 10000;
@@ -24,54 +28,59 @@ int main(int argc, char *argv[])
 	int dataSize = dataSizePerNode * commSize;
 
 	// Generate some random numbers on the root node.
-	float *data;
+	int *data;
 	if (commRank == 0)
 	{
-		data = new float[dataSize];
+		data = new int[dataSize];
 		for (int i = 0; i < dataSize; ++i)
 		{
-			data[i] = rand() / (float)RAND_MAX;
+			data[i] = rand() % 10;
 		}
 	}
 
-	// Allocate a buffer on each node.
-	float *dataPerNode = new float[dataSizePerNode];
+	// Allocate a buffer on the current node.
+	int *dataPerNode = new int[dataSizePerNode];
 
 	// Dispatch a portion of the input data to each node.
-	MPI_Scatter(data, dataSizePerNode, MPI_FLOAT, dataPerNode, dataSizePerNode, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	MPI_Scatter(data, dataSizePerNode, MPI_INT, dataPerNode, dataSizePerNode, MPI_INT, 0, MPI_COMM_WORLD);
 
 	// Compute the square of each element on device.
-	float *d;
-	cudaMalloc((void **)&d, sizeof(float) * dataSizePerNode);
-	cudaMemcpy(d, dataPerNode, sizeof(float) * dataSizePerNode, cudaMemcpyHostToDevice);
+	int *d;
+	cudaSetDevice(commRank % numDevices);
+	cudaMalloc((void **)&d, sizeof(int) * dataSizePerNode);
+	cudaMemcpy(d, dataPerNode, sizeof(int) * dataSizePerNode, cudaMemcpyHostToDevice);
 	square<<<numBlocksPerGrid, numThreadsPerBlock>>>(d);
-	cudaMemcpy(dataPerNode, d, sizeof(float) * dataSizePerNode, cudaMemcpyDeviceToHost);
+	cudaMemcpy(dataPerNode, d, sizeof(int) * dataSizePerNode, cudaMemcpyDeviceToHost);
 	cudaFree(d);
 
-	// Compute the sum of
-	float sumNode = 0.f;
+	// Compute the sum of the current node.
+	int sum = 0;
 	for (int i = 0; i < dataSizePerNode; ++i)
 	{
-		sumNode += dataPerNode[i];
+		sum += dataPerNode[i];
 	}
 
+	// Compute the sum of all nodes.
+	int actual;
+	MPI_Reduce(&sum, &actual, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
-	float sumRoot;
-	MPI_Reduce(&sumNode, &sumRoot, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-
+	// Validate the result.
 	if (commRank == 0)
 	{
-		printf("sumRoot = %f\n", sumRoot);
-		float sumNode = 0.f;
+		int expected = 0;
 		for (int i = 0; i < dataSize; ++i)
 		{
-			sumNode += data[i] * data[i];
+			expected += data[i] * data[i];
 		}
-		printf("sumNode = %f\n", sumNode);
+		if (actual != expected)
+		{
+			printf("actual = %d, expected = %d\n", actual, expected);
+		}
 		delete[] data;
 	}
 
 	// Cleanup.
 	delete[] dataPerNode;
+	cudaDeviceReset();
 	MPI_Finalize();
 }
