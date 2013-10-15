@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 	cudaGetDeviceCount(&numDevices);
 
 	// Allocate and initialize data.
-	size_t numElements = 44100 * numDevices;
+	size_t numElements = 8192 * numDevices;
 	size_t numBytes = sizeof(int) * numElements;
 	int *data = (int *)malloc(numBytes);
 	memset(data, 0, numBytes);
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
 		// Invoke the kernel for the current portion of the data.
 		scalarAdd<<<numElementsPerThread / 128, 128>>>(d, inc);
-		
+
 		// Copy the portion of the data of the current CPU thread from device memory to host memory.
 		cudaMemcpy(h, d, numBytesPerThread, cudaMemcpyDeviceToHost);
 
