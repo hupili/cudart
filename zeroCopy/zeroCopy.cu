@@ -13,6 +13,9 @@ int main(int argc, char *argv[])
 	const unsigned int numBlocksPerGrid = 1024;
 	const unsigned int numThreadsPerGrid = numThreadsPerBlock * numBlocksPerGrid;
 
+	// Set the flag in order to allocate pinned host memory that is accessible to the device.
+	cudaSetDeviceFlags(cudaDeviceMapHost);
+
 	// Allocate pinned vectors a, b and c in host memory with the cudaHostAllocMapped flag so that they can be accessed by the device.
 	float* h_a;
 	float* h_b;
