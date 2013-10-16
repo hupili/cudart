@@ -132,11 +132,11 @@ int main(int argc, char **argv)
 	}
 
 	// Cleanup.
-	cudaFree(d_A);
-	cudaFree(d_B);
 	cudaFree(d_C);
+	cudaFree(d_B);
+	cudaFree(d_A);
 	cudaDeviceReset();
-	free(h_A);
-	free(h_B);
 	free(h_C);
+	free(h_B);
+	free(h_A);
 }
