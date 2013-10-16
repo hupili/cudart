@@ -88,14 +88,11 @@ int main(int argc, char *argv[])
 	}
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
-	float msecTotal;
-	cudaEventElapsedTime(&msecTotal, start, stop);
+	float elapsed;
+	cudaEventElapsedTime(&elapsed, start, stop);
 
-	// Compute and print the performance
-	float msecPerMatrixMul = msecTotal / numIterations;
-	double flopsPerMatrixMul = 2.0 * (double)matrix_size.uiWA * (double)matrix_size.uiHA * (double)matrix_size.uiWB;
-	double gigaFlops = (flopsPerMatrixMul * 1.0e-9f) / (msecPerMatrixMul / 1000.0f);
-	printf("Performance= %.2f GFlop/s, Time= %.3f msec, Size= %.0f Ops\n", gigaFlops, msecPerMatrixMul, flopsPerMatrixMul);
+	// Compute and print the GLOPS/s performance metric.
+	printf("%.2f GFLOP/s\n", (2.0f * matrix_size.uiWA * matrix_size.uiHA * matrix_size.uiWB * numIterations * 1e-9f) / (elapsed / 1000.0f));
 
 	// Copy result from device to host.
 	cudaMemcpy(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost);
