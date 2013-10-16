@@ -1,11 +1,6 @@
 #include <stdio.h>
 #include <cublas_v2.h>
 
-typedef struct _matrixSize
-{
-	unsigned int uiWA, uiHA, uiWB, uiHB, uiWC, uiHC;
-} sMatrixSize;
-
 void matrixMulCPU(float *C, const float *A, const float *B, unsigned int hA, unsigned int wA, unsigned int wB)
 {
 	for (int i = 0; i < hA; ++i)
@@ -26,16 +21,15 @@ int main(int argc, char *argv[])
 {
 	// Initialize constants.
 	int block_size = 32;
-	sMatrixSize matrix_size;
-	matrix_size.uiWA = 2 * block_size * 5;
-	matrix_size.uiHA = 4 * block_size * 5;
-	matrix_size.uiWB = 2 * block_size * 5;
-	matrix_size.uiHB = 4 * block_size * 5;
-	matrix_size.uiWC = 2 * block_size * 5;
-	matrix_size.uiHC = 4 * block_size * 5;
-	unsigned int size_A = matrix_size.uiWA * matrix_size.uiHA;
-	unsigned int size_B = matrix_size.uiWB * matrix_size.uiHB;
-	unsigned int size_C = matrix_size.uiWC * matrix_size.uiHC;
+	int uiWA = 2 * block_size * 5;
+	int uiHA = 4 * block_size * 5;
+	int uiWB = 2 * block_size * 5;
+	int uiHB = 4 * block_size * 5;
+	int uiWC = 2 * block_size * 5;
+	int uiHC = 4 * block_size * 5;
+	unsigned int size_A = uiWA * uiHA;
+	unsigned int size_B = uiWB * uiHB;
+	unsigned int size_C = uiWC * uiHC;
 	unsigned int mem_size_A = sizeof(float) * size_A;
 	unsigned int mem_size_B = sizeof(float) * size_B;
 	unsigned int mem_size_C = sizeof(float) * size_C;
@@ -68,7 +62,7 @@ int main(int argc, char *argv[])
 
 	// Determine the number of threads per block and the number of blocks per grid.
 	dim3 numThreadsPerBlock(block_size, block_size);
-	dim3 numBlocksPerGrid(matrix_size.uiWC / numThreadsPerBlock.x, matrix_size.uiHC / numThreadsPerBlock.y);
+	dim3 numBlocksPerGrid(uiWC / numThreadsPerBlock.x, uiHC / numThreadsPerBlock.y);
 
 	// Initialize a cublas handle.
 	cublasHandle_t handle;
@@ -77,7 +71,7 @@ int main(int argc, char *argv[])
 	// CUBLAS is column primary.
 	const float alpha = 1.0f;
 	const float beta  = 0.0f;
-	cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, matrix_size.uiWB, matrix_size.uiHA, matrix_size.uiWA, &alpha, d_B, matrix_size.uiWB, d_A, matrix_size.uiWA, &beta, d_C, matrix_size.uiWA);
+	cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, uiWB, uiHA, uiWA, &alpha, d_B, uiWB, d_A, uiWA, &beta, d_C, uiWA);
 
 	// Measure the performance of cublasSgemm over a number of iterations.
 	cudaEvent_t start, stop;
@@ -87,7 +81,7 @@ int main(int argc, char *argv[])
 	int numIterations = 30;
 	for (int i = 0; i < numIterations; ++i)
 	{
-		cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, matrix_size.uiWB, matrix_size.uiHA, matrix_size.uiWA, &alpha, d_B, matrix_size.uiWB, d_A, matrix_size.uiWA, &beta, d_C, matrix_size.uiWA);
+		cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, uiWB, uiHA, uiWA, &alpha, d_B, uiWB, d_A, uiWA, &beta, d_C, uiWA);
 	}
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
@@ -95,21 +89,21 @@ int main(int argc, char *argv[])
 	cudaEventElapsedTime(&elapsed, start, stop);
 
 	// Compute and print the GLOPS/s performance metric.
-	printf("%.2f GFLOP/s\n", (2.0f * matrix_size.uiWA * matrix_size.uiHA * matrix_size.uiWB * numIterations * 1e-9f) / (elapsed / 1000.0f));
+	printf("%.2f GFLOP/s\n", (2.0f * uiWA * uiHA * uiWB * numIterations * 1e-9f) / (elapsed / 1000.0f));
 
 	// Copy matrix c from device memory to host memory.
 	cudaMemcpy(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost);
 
 	// Compute reference solution.
 	float *ref = (float *)malloc(mem_size_C);
-	matrixMulCPU(ref, h_A, h_B, matrix_size.uiHA, matrix_size.uiWA, matrix_size.uiWB);
+	matrixMulCPU(ref, h_A, h_B, uiHA, uiWA, uiWB);
 
 	// Validate the result.
 	for (int i = 0; i < size_C; ++i)
 	{
 		float actual = h_C[i];
 		float expected = ref[i];
-		if (fabs(actual - expected) / fabs(actual) / matrix_size.uiWA > 1e-7)
+		if (fabs(actual - expected) / fabs(actual) / uiWA > 1e-7)
 		{
 			printf("h_C[%d] = %f, expected = %f\n", i, actual, expected);
 			break;
