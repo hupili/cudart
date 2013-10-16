@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <helper_functions.h>
 #include <cublas_v2.h>
 
 typedef struct _matrixSize
@@ -106,9 +105,15 @@ int main(int argc, char *argv[])
 	matrixMulCPU(ref, h_A, h_B, matrix_size.uiHA, matrix_size.uiWA, matrix_size.uiWB);
 
 	// Validate the result.
-	if (!sdkCompareL2fe(ref, h_C, size_C, 1e-6f))
+	for (int i = 0; i < size_C; ++i)
 	{
-		printf("error\n");
+		float actual = h_C[i];
+		float expected = ref[i];
+		if (fabs(actual - expected) / fabs(actual) / matrix_size.uiWA > 1e-7)
+		{
+			printf("h_C[%d] = %f, expected = %f\n", i, actual, expected);
+			break;
+		}
 	}
 
 	// Cleanup.

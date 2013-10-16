@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 		float expected = dimsA.x * valB;
 		if (fabs(actual - expected) / fabs(actual) / dimsA.x > 1e-7)
 		{
-			printf("h_C[%d]=%f, expected=%f\n", i, actual, expected);
+			printf("h_C[%d] = %f, expected = %f\n", i, actual, expected);
 		}
 	}
 
