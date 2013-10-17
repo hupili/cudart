@@ -11,7 +11,7 @@ __global__ void vectorAdd(const float *a, const float *b, float *c, int numEleme
 
 int main(int argc, char *argv[])
 {
-	int numElements = 50000;
+	int numElements = 5e+4;
 
 	// Allocate vectors a, b and c in host memory.
 	size_t numBytes = sizeof(float) * numElements;
