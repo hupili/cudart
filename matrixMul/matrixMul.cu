@@ -39,7 +39,7 @@ template <int BLOCK_SIZE> __global__ void matrixMul(float *C, float *A, float *B
 	C[c + wB * ty + tx] = Csub;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	// Initialize constants.
 	const int block_size = 32;
