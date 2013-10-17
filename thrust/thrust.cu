@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 
 	// Copy the vector from host memory to device memory.
 	thrust::device_vector<int> d = h;
- 
+
 	// Compute the sum on the device.
 	int actual = thrust::reduce(d.begin(), d.end(), 0, thrust::plus<int>());
 
