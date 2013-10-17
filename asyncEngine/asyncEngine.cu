@@ -99,6 +99,11 @@ int main(int argc, char *argv[])
 	free(d_c);
 	free(d_b);
 	free(d_a);
+    for (int i = 0; i < numStreams; ++i)
+    {
+        cudaStreamDestroy(streams[i]);
+    }
+    free(streams);
 	cudaFreeHost(h_c);
 	cudaFreeHost(h_b);
 	cudaFreeHost(h_a);
