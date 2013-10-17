@@ -1,4 +1,4 @@
-CC=nvcc -arch=sm_11
+CC=nvcc -arch=sm_35
 
 mpi: mpi.o
 	$(CC) -o $@ $^ -L /usr/lib/openmpi -lmpi -lmpi_cxx
