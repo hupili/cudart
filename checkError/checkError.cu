@@ -9,11 +9,10 @@ __global__ void iota(float *a)
 int main(int argc, char *argv[])
 {
 	int numElements = 1e+8;
-	size_t size = sizeof(float) * numElements;
 
 	// Allocate vector a in device memory.
 	float *d_a;
-	checkCudaErrors(cudaMalloc((void **)&d_a, size));
+	checkCudaErrors(cudaMalloc((void **)&d_a, sizeof(float) * numElements));
 
 	// Determine the number of threads per block and the number of blocks per grid.
 	int numThreadsPerBlock = 256;
