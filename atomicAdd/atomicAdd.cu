@@ -27,9 +27,6 @@ int main(int argc, char *argv[])
 	// Invoke the kernel on device asynchronously.
 	atomicAdd<<<2, 2>>>();
 
-	// Wait for the device to finish.
-	cudaDeviceSynchronize();
-
 	// Copy sum from device memory to host memory synchronously.
 	cudaMemcpyFromSymbol(&h_sum, sum, sizeof(int));
 
