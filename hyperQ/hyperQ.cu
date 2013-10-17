@@ -44,10 +44,6 @@ int main(int argc, char *argv[])
 	{
 		for (int k = 0; k < numKernels; ++k)
 		{
-			// The 1st argument is of type dim3 and specifies the number of blocks per grid.
-			// The 2nd argument is of type dim3 and specifies the number of threads per block.
-			// The 3rd argument is of type size_t and specifiesthe number of bytes in shared memory that is dynamically allocated per block for this call in addition to the statically allocated memory. It is an optional argument which defaults to 0.
-			// The 4th argument is of type cudaStream_t and specifies the associated stream. It is an optional argument which defaults to 0.
 			spin<<<1, 1, 0, streams[s]>>>(numClocks);
 		}
 	}

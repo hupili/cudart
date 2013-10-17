@@ -65,6 +65,10 @@ int main(int argc, char *argv[])
 		unsigned int numBlocksPerGrid = (numElementsCurrentStream + numThreadsPerBlock - 1) / numThreadsPerBlock;
 
 		// Invoke the kernel on device asynchronously.
+		// The 1st argument is of type dim3 and specifies the number of blocks per grid.
+		// The 2nd argument is of type dim3 and specifies the number of threads per block.
+		// The 3rd argument is of type size_t and specifiesthe number of bytes in shared memory that is dynamically allocated per block for this call in addition to the statically allocated memory. It is an optional argument which defaults to 0.
+		// The 4th argument is of type cudaStream_t and specifies the associated stream. It is an optional argument which defaults to 0.
 		vectorAdd<<<numBlocksPerGrid, numThreadsPerBlock, 0, streams[i]>>>(d_a[i], d_b[i], d_c[i], numElementsCurrentStream);
 
 		// Copy vector c from device memory to host memory asynchronously.
