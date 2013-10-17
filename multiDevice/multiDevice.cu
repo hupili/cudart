@@ -95,11 +95,9 @@ int main(int argc, char *argv[])
 	// Cleanup.
 	for (int i = 0; i < numDevices; ++i)
 	{
-		cudaSetDevice(i);
 		cudaFree(d_c[i]);
 		cudaFree(d_b[i]);
 		cudaFree(d_a[i]);
-		cudaDeviceReset();
 	}
 	free(d_c);
 	free(d_b);
@@ -107,4 +105,9 @@ int main(int argc, char *argv[])
 	cudaFreeHost(h_c);
 	cudaFreeHost(h_b);
 	cudaFreeHost(h_a);
+	for (int i = 0; i < numDevices; ++i)
+	{
+		cudaSetDevice(i);
+		cudaDeviceReset();
+	}
 }
