@@ -31,14 +31,43 @@ This sample uses shared memory to accelerate matrix multiplication.
 atomicAdd
 ---------
 
-This sample uses atomic operations and printf.
+This sample uses atomic functions, assertions and printf.
+
+asyncEngine
+-----------
+
+This sample uses asynchronous engines to overlap data transfer and kernel execution.
 
 hyperQ
 ------
 
-This sample uses multiple streams to exploit the HyperQ technology.
+This sample uses multiple streams to overlap multiple kernel execution, known as the HyperQ technology.
 
 deviceQuery
 -----------
 
 This sample enumerates the properties of the CUDA devices present in the system.
+multiDevice
+-----------
+
+This sample uses cudaSetDevice within a single thread to utilize multiple GPUs.
+
+openmp
+------
+
+This sample uses OpenMP to create multiple CPU threads to utilize multiple GPUs.
+
+mpi
+---
+
+This sample uses MPI to create multiple CPU processes to utilize multiple GPUs.
+
+cublas
+------
+
+This sample uses CUBLAS, a CUDA implementation of BLAS (Basic Linear Algebra Subprograms), for matrix multiplication.
+
+thrust
+------
+
+This sample uses thrust, a CUDA implementation of STL (Standard Template Library), for vector reduction.
