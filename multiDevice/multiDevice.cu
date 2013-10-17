@@ -37,6 +37,10 @@ int main(int argc, char *argv[])
 	int avgElementsPerDevice = numElements / numDevices;
 	int sprElements = numElements - avgElementsPerDevice * numDevices;
 
+	float **d_a = (float **)malloc(sizeof(float *) * numDevices);
+	float **d_b = (float **)malloc(sizeof(float *) * numDevices);
+	float **d_c = (float **)malloc(sizeof(float *) * numDevices);
+
 	for (int i = 0, offset = 0; i < numDevices; ++i)
 	{
 		// Determine the number of elements to be processed by the current device.
@@ -47,31 +51,23 @@ int main(int argc, char *argv[])
 
 		// Allocate vectors a, b and c in device memory.
 		size_t numBytesCurrentDevice = sizeof(int) * numElementsCurrentDevice;
-		float *d_a;
-		float *d_b;
-		float *d_c;
-		cudaMalloc((void **)&d_a, numBytesCurrentDevice);
-		cudaMalloc((void **)&d_b, numBytesCurrentDevice);
-		cudaMalloc((void **)&d_c, numBytesCurrentDevice);
+		cudaMalloc((void **)&d_a[i], numBytesCurrentDevice);
+		cudaMalloc((void **)&d_b[i], numBytesCurrentDevice);
+		cudaMalloc((void **)&d_c[i], numBytesCurrentDevice);
 
 		// Copy vectors a and b from host memory to device memory asynchronously.
-		cudaMemcpyAsync(d_a, h_a + offset, numBytesCurrentDevice, cudaMemcpyHostToDevice);
-		cudaMemcpyAsync(d_b, h_b + offset, numBytesCurrentDevice, cudaMemcpyHostToDevice);
+		cudaMemcpyAsync(d_a[i], h_a + offset, numBytesCurrentDevice, cudaMemcpyHostToDevice);
+		cudaMemcpyAsync(d_b[i], h_b + offset, numBytesCurrentDevice, cudaMemcpyHostToDevice);
 
 		// Determine the number of threads per block and the number of blocks per grid.
 		unsigned int numThreadsPerBlock = 256;
 		unsigned int numBlocksPerGrid = (numElementsCurrentDevice + numThreadsPerBlock - 1) / numThreadsPerBlock;
 
 		// Invoke the kernel on device asynchronously.
-		vectorAdd<<<numBlocksPerGrid, numThreadsPerBlock>>>(d_a, d_b, d_c, numElementsCurrentDevice);
+		vectorAdd<<<numBlocksPerGrid, numThreadsPerBlock>>>(d_a[i], d_b[i], d_c[i], numElementsCurrentDevice);
 
 		// Copy vector c from device memory to host memory asynchronously.
-		cudaMemcpyAsync(h_c + offset, d_c, numBytesCurrentDevice, cudaMemcpyDeviceToHost);
-
-		// Cleanup.
-//		cudaFree(d_c);
-//		cudaFree(d_b);
-//		cudaFree(d_a);
+		cudaMemcpyAsync(h_c + offset, d_c[i], numBytesCurrentDevice, cudaMemcpyDeviceToHost);
 
 		// Increase offset to point to the next portion of data.
 		offset += numElementsCurrentDevice;
@@ -92,17 +88,23 @@ int main(int argc, char *argv[])
 		if (fabs(actual - expected) > 1e-7)
 		{
 			printf("h_c[%d] = %f, expected = %f\n", i, actual, expected);
-//			break;
+			break;
 		}
 	}
 
 	// Cleanup.
-	cudaFreeHost(h_c);
-	cudaFreeHost(h_b);
-	cudaFreeHost(h_a);
 	for (int i = 0; i < numDevices; ++i)
 	{
 		cudaSetDevice(i);
+		cudaFree(d_c[i]);
+		cudaFree(d_b[i]);
+		cudaFree(d_a[i]);
 		cudaDeviceReset();
 	}
+	free(d_c);
+	free(d_b);
+	free(d_a);
+	cudaFreeHost(h_c);
+	cudaFreeHost(h_b);
+	cudaFreeHost(h_a);
 }
