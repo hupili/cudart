@@ -4,7 +4,7 @@ thrust: thrust.o
 	$(CC) -o $@ $^
 
 thrust.o: thrust.cu
-	$(CC) -o $@ $< -c -I ~/cuda-5.5/include
+	$(CC) -o $@ $< -c -I /usr/local/cuda/include
 
 clean:
 	rm -f thrust thrust.o
