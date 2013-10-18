@@ -7,11 +7,12 @@ __global__ void vectorAdd(const float *a, const float *b, float *c, int numEleme
 	{
 		c[i] = a[i] + b[i];
 	}
+	for (const clock_t threshold = clock() + 1e+4; clock() < threshold;);
 }
 
 int main(int argc, char *argv[])
 {
-	int numElements = 5e+4;
+	int numElements = 3 << 22;
 
 	// Allocate vectors a, b and c in host memory.
 	size_t numBytes = sizeof(float) * numElements;
