@@ -96,6 +96,7 @@ int main(int argc, char *argv[])
 	// Cleanup.
 	for (int i = 0; i < numDevices; ++i)
 	{
+		cudaSetDevice(i);
 		cudaFree(d_c[i]);
 		cudaFree(d_b[i]);
 		cudaFree(d_a[i]);
