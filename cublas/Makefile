@@ -4,7 +4,7 @@ cublas: cublas.o
 	$(CC) -o $@ $^ -lcublas
 
 cublas.o: cublas.cu
-	$(CC) -o $@ $< -c -I /usr/local/cuda/samples/common/inc
+	$(CC) -o $@ $< -c
 
 clean:
 	rm -f cublas cublas.o
