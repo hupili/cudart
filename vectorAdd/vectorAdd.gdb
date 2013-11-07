@@ -3,13 +3,13 @@ NVIDIA (R) CUDA Debugger
 Portions Copyright (C) 2007-2013 NVIDIA Corporation
 GNU gdb (GDB) 7.2
 Copyright (C) 2010 Free Software Foundation, Inc.
-License GPLv3+: GNU GPL version 3 or later &lt;http://gnu.org/licenses/gpl.html&gt;
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
 and "show warranty" for details.
 This GDB was configured as "x86_64-unknown-linux-gnu".
 For bug reporting instructions, please see:
-&lt;http://www.gnu.org/software/gdb/bugs/&gt;...
+<http://www.gnu.org/software/gdb/bugs/>...
 Reading symbols from /home/hjli/cudart/vectorAdd/vectorAdd...done.
 (cuda-gdb) b vectorAdd
 Breakpoint 1 at 0x402dd9: file vectorAdd.cu, line 4.
