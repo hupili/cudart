@@ -1,92 +1,129 @@
 #include <stdio.h>
+#include <time.h>
 
-template <int BLOCK_SIZE> __global__ void matrixMul(float *C, float *A, float *B, int wA, int wB)
+void naiveMultiply(float *a, float *b, float *c, int M, int N, int w)
 {
-	int bx = blockIdx.x;
-	int by = blockIdx.y;
-	int tx = threadIdx.x;
-	int ty = threadIdx.y;
-	int aBegin = wA * BLOCK_SIZE * by;
-	int aEnd   = aBegin + wA - 1;
-	int aStep  = BLOCK_SIZE;
-	int bBegin = BLOCK_SIZE * bx;
-	int bStep  = BLOCK_SIZE * wB;
-	float Csub = 0;
-	for (int a = aBegin, b = bBegin; a <= aEnd; a += aStep, b += bStep)
+	for (int row = 0; row < M; ++row)
+	for (int col = 0; col < N; ++col)
 	{
-		// Allocate blocks of data in shared memory.
-		__shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
-		__shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
-
-		// Copy a block of data from global memory to shared memory.
-		As[ty][tx] = A[a + wA * ty + tx];
-		Bs[ty][tx] = B[b + wB * ty + tx];
-
-		// Waits until all threads in the thread block have reached this point and all global and shared memory accesses made by these threads prior to __syncthreads() are visible to all threads in the block.
-		__syncthreads();
-
-// Unrolling is possible because BLOCK_SIZE is known at compile time.
-#pragma unroll
-		for (int k = 0; k < BLOCK_SIZE; ++k)
+		float sum = 0.0f;
+		for (int i = 0; i < w; ++i)
 		{
-			Csub += As[ty][k] * Bs[k][tx];
+			sum += a[row*w+i] * b[i*N+col];
 		}
-		__syncthreads();
+		c[row*N+col] = sum;
 	}
+}
 
-	// Save the result from shared memory to global memory.
-	int c = wB * BLOCK_SIZE * by + BLOCK_SIZE * bx;
-	C[c + wB * ty + tx] = Csub;
+template <int TILE_DIM> __global__ void simpleMultiply(float *a, float *b, float *c, int N)
+{
+	int row = blockIdx.y * blockDim.y + threadIdx.y;
+	int col = blockIdx.x * blockDim.x + threadIdx.x;
+	float sum = 0.0f;
+	for (int i = 0; i < TILE_DIM; ++i)
+	{
+		sum += a[row*TILE_DIM+i] * b[i*N+col];
+	}
+	c[row*N+col] = sum;
+}
+
+template <int TILE_DIM> __global__ void coalescedMultiply(float *a, float *b, float *c, int N)
+{
+	__shared__ float aTile[TILE_DIM][TILE_DIM];
+	int row = blockIdx.y * blockDim.y + threadIdx.y;
+	int col = blockIdx.x * blockDim.x + threadIdx.x;
+	float sum = 0.0f;
+	aTile[threadIdx.y][threadIdx.x] = a[row*TILE_DIM+threadIdx.x];
+	for (int i = 0; i < TILE_DIM; i++)
+	{
+		sum += aTile[threadIdx.y][i]* b[i*N+col];
+	}
+	c[row*N+col] = sum;
+}
+
+template <int TILE_DIM> __global__ void sharedABMultiply(float *a, float *b, float *c, int N)
+{
+	__shared__ float aTile[TILE_DIM][TILE_DIM];
+	__shared__ float bTile[TILE_DIM][TILE_DIM];
+	int row = blockIdx.y * blockDim.y + threadIdx.y;
+	int col = blockIdx.x * blockDim.x + threadIdx.x;
+	float sum = 0.0f;
+	aTile[threadIdx.y][threadIdx.x] = a[row*TILE_DIM+threadIdx.x];
+	bTile[threadIdx.y][threadIdx.x] = b[threadIdx.y*N+col];
+	__syncthreads();
+	for (int i = 0; i < TILE_DIM; ++i)
+	{
+		sum += aTile[threadIdx.y][i]* bTile[i][threadIdx.x];
+	}
+	c[row*N+col] = sum;
+}
+
+template <int TILE_DIM> __global__ void sharedABUnrolledMultiply(float *a, float *b, float *c, int N)
+{
+	__shared__ float aTile[TILE_DIM][TILE_DIM];
+	__shared__ float bTile[TILE_DIM][TILE_DIM];
+	int row = blockIdx.y * blockDim.y + threadIdx.y;
+	int col = blockIdx.x * blockDim.x + threadIdx.x;
+	float sum = 0.0f;
+	aTile[threadIdx.y][threadIdx.x] = a[row*TILE_DIM+threadIdx.x];
+	bTile[threadIdx.y][threadIdx.x] = b[threadIdx.y*N+col];
+	__syncthreads();
+// Unrolling is possible provided that TILE_DIM is known at compile time.
+#pragma unroll
+	for (int i = 0; i < TILE_DIM; ++i)
+	{
+		sum += aTile[threadIdx.y][i]* bTile[i][threadIdx.x];
+	}
+	c[row*N+col] = sum;
 }
 
 int main(int argc, char *argv[])
 {
 	// Initialize constants.
-	const int block_size = 32;
-	dim3 dimsA(5 * 2 * block_size, 5 * 2 * block_size, 1);
-	dim3 dimsB(5 * 4 * block_size, 5 * 2 * block_size, 1);
-	dim3 dimsC(dimsB.x, dimsA.y, 1);
-	unsigned int size_A = dimsA.x * dimsA.y;
-	unsigned int size_B = dimsB.x * dimsB.y;
-	unsigned int size_C = dimsC.x * dimsC.y;
-	unsigned int mem_size_A = sizeof(float) * size_A;
-	unsigned int mem_size_B = sizeof(float) * size_B;
-	unsigned int mem_size_C = sizeof(float) * size_C;
+	const int w = 32;
+	const int M = w * 19;
+	const int N = w * 23;
+	size_t numElementsA = M * w;
+	size_t numElementsB = w * N;
+	size_t numElementsC = M * N;
+	size_t numBytesA = sizeof(float) * numElementsA;
+	size_t numBytesB = sizeof(float) * numElementsB;
+	size_t numBytesC = sizeof(float) * numElementsC;
 
 	// Allocate matrices a, b and c in host memory.
-	float *h_A = (float *)malloc(mem_size_A);
-	float *h_B = (float *)malloc(mem_size_B);
-	float *h_C = (float *)malloc(mem_size_C);
+	float *h_a = (float *)malloc(numBytesA);
+	float *h_b = (float *)malloc(numBytesB);
+	float *h_c = (float *)malloc(numBytesC);
+	float *h_r = (float *)malloc(numBytesC);
 
 	// Initialize matrices a and b.
-	for (int i = 0; i < size_A; ++i)
+	srand(time(0));
+	for (int i = 0; i < numElementsA; ++i)
 	{
-		h_A[i] = 1.0f;
+		h_a[i] = rand() / (float)RAND_MAX;
 	}
-	const float valB = 0.01f;
-	for (int i = 0; i < size_B; ++i)
+	for (int i = 0; i < numElementsB; ++i)
 	{
-		h_B[i] = valB;
+		h_b[i] = rand() / (float)RAND_MAX;
 	}
+
+	// Compute a reference answer in host.
+	naiveMultiply(h_a, h_b, h_r, M, N, w);
 
 	// Allocate matrices a, b and c in device memory.
-	float *d_A, *d_B, *d_C;
-	cudaMalloc((void **)&d_A, mem_size_A);
-	cudaMalloc((void **)&d_B, mem_size_B);
-	cudaMalloc((void **)&d_C, mem_size_C);
+	float *d_a, *d_b, *d_c;
+	cudaMalloc((void **)&d_a, numBytesA);
+	cudaMalloc((void **)&d_b, numBytesB);
+	cudaMalloc((void **)&d_c, numBytesC);
 
 	// Copy matrices a and b from host memory to device memory.
-	cudaMemcpy(d_A, h_A, mem_size_A, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_B, h_B, mem_size_B, cudaMemcpyHostToDevice);
+	cudaMemcpy(d_a, h_a, numBytesA, cudaMemcpyHostToDevice);
+	cudaMemcpy(d_b, h_b, numBytesB, cudaMemcpyHostToDevice);
 
-	// Determine the number of threads per block and the number of blocks per grid.
-	dim3 threadsPerBlock(block_size, block_size);
-	dim3 blocksPerGrid(dimsB.x / threadsPerBlock.x, dimsA.y / threadsPerBlock.y);
-
-	// Invoke the kernel on device asynchronously.
-	matrixMul<block_size><<<blocksPerGrid, threadsPerBlock>>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
-
-	// Wait for the device to finish.
+	// Warm up the device.
+	dim3 numThreadsPerBlock(w, w);
+	dim3 numBlocksPerGrid(N / numThreadsPerBlock.x, M / numThreadsPerBlock.y);
+	simpleMultiply<w><<<numBlocksPerGrid, numThreadsPerBlock>>>(d_a, d_b, d_c, N);
 	cudaDeviceSynchronize();
 
 	// Create events to record timing data.
@@ -94,18 +131,18 @@ int main(int argc, char *argv[])
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
 
-	// Record an event in stream 0 before kernel invocations.
-	cudaEventRecord(start, 0);
+	// Record an event before kernel invocations.
+	cudaEventRecord(start);
 
 	// Invoke the kernel for a number of iterations.
 	int numIterations = 300;
 	for (int i = 0; i < numIterations; ++i)
 	{
-		matrixMul<block_size><<<blocksPerGrid, threadsPerBlock>>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
+		sharedABUnrolledMultiply<w><<<numBlocksPerGrid, numThreadsPerBlock>>>(d_a, d_b, d_c, N);
 	}
 
-	// Record an event in stream 0 after kernel invocations.
-	cudaEventRecord(stop, 0);
+	// Record an event after kernel invocations.
+	cudaEventRecord(stop);
 
 	// Wait for the event to complete.
 	cudaEventSynchronize(stop);
@@ -115,28 +152,30 @@ int main(int argc, char *argv[])
 	cudaEventElapsedTime(&elapsed, start, stop);
 
 	// Compute and print the GLOPS/s performance metric.
-	printf("%.2f GFLOP/s\n", (2.0f * dimsA.x * dimsA.y * dimsB.x * numIterations * 1e-9f) / (elapsed / 1000.0f));
+	printf("%.2f GFLOP/s\n", (2.0f * M * N * w * numIterations * 1e-9f) / (elapsed / 1000.0f));
 
 	// Copy matrix c from device memory to host memory synchronously.
-	cudaMemcpy(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_c, d_c, numBytesC, cudaMemcpyDeviceToHost);
 
 	// Validate the result.
-	for (int i = 0; i < dimsC.x * dimsC.y; ++i)
+	for (int i = 0; i < numElementsC; ++i)
 	{
-		float actual = h_C[i];
-		float expected = dimsA.x * valB;
-		if (fabs(actual - expected) / fabs(actual) / dimsA.x > 1e-7)
+		float actual = h_c[i];
+		float expected = h_r[i];
+		if (fabs(actual - expected) / w > 1e-6)
 		{
-			printf("h_C[%d] = %f, expected = %f\n", i, actual, expected);
+			printf("h_c[%d] = %f, expected = %f\n", i, actual, expected);
+			break;
 		}
 	}
 
 	// Cleanup.
-	cudaFree(d_C);
-	cudaFree(d_B);
-	cudaFree(d_A);
+	cudaFree(d_c);
+	cudaFree(d_b);
+	cudaFree(d_a);
 	cudaDeviceReset();
-	free(h_C);
-	free(h_B);
-	free(h_A);
+	free(h_r);
+	free(h_c);
+	free(h_b);
+	free(h_a);
 }
