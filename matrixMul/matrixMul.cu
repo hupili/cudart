@@ -81,8 +81,8 @@ int main(int argc, char *argv[])
 {
 	// Initialize constants.
 	const int w = 32;
-	const int M = w * 19;
-	const int N = w * 23;
+	const int M = w * 59;
+	const int N = w * 53;
 	size_t numElementsA = M * w;
 	size_t numElementsB = w * N;
 	size_t numElementsC = M * N;
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 	int numIterations = 300;
 	for (int i = 0; i < numIterations; ++i)
 	{
-		sharedABUnrolledMultiply<w><<<numBlocksPerGrid, numThreadsPerBlock>>>(d_a, d_b, d_c, N);
+		simpleMultiply<w><<<numBlocksPerGrid, numThreadsPerBlock>>>(d_a, d_b, d_c, N);
 	}
 
 	// Record an event after kernel invocations.
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 	{
 		float actual = h_c[i];
 		float expected = h_r[i];
-		if (fabs(actual - expected) / w > 1e-6)
+		if (fabs(actual - expected) / w > 1e-7)
 		{
 			printf("h_c[%d] = %f, expected = %f\n", i, actual, expected);
 			break;
