@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 	{
 		float actual = h_c[i];
 		float expected = h_r[i];
-		if (fabs(actual - expected) / w > 1e-7)
+		if (fabs(actual - expected) / w > 1e-6)
 		{
 			printf("h_c[%d] = %f, expected = %f\n", i, actual, expected);
 			break;
