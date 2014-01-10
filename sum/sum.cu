@@ -13,7 +13,7 @@ int my_rand(void)
 	return dist(rng);
 }
 
-int main(void)
+int main(int argc, char* argv[])
 {
 	// Generate random data on the host.
 	host_vector<int> h(100);
@@ -22,7 +22,7 @@ int main(void)
 	// Copy data from host to device.
 	device_vector<int> d = h;
 
-	// Compute sum on the device
+	// Compute sum on the device.
 	int sum = reduce
 	(
 		d.begin(), d.end(), // Data range.

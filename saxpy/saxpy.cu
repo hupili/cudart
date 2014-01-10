@@ -1,7 +1,6 @@
 #include <thrust/device_vector.h>
 #include <thrust/functional.h>
 #include <thrust/transform.h>
-using namespace std;
 using namespace thrust;
 using namespace thrust::placeholders;
 
@@ -24,6 +23,6 @@ int main(int argc, char* argv[])
 
 	for (size_t i = 0; i < 4; ++i)
 	{
-		cout << a << " * " << x[i] << " + " << y[i] << " = " << Y[i] << endl;
+		std::cout << a << " * " << x[i] << " + " << y[i] << " = " << Y[i] << std::endl;
 	}
 }
