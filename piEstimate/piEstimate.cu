@@ -70,5 +70,5 @@ int main(int argc, char* argv[])
 	float pi = pi_M / M;
 
 	// Print pi.
-	std::cout << "pi = " << pi << std::endl;
+	std::cout << pi << std::endl;
 }

@@ -31,5 +31,5 @@ int main(int argc, char* argv[])
 	);
 
 	// Print the sum.
-	std::cout << "sum = " << sum << std::endl;
+	std::cout << sum << std::endl;
 }

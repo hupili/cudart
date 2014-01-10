@@ -28,5 +28,5 @@ int main(int argc, char* argv[])
 	float norm = std::sqrt(norm2);
 
 	// Print the norm.
-	std::cout << "norm = " << norm << std::endl;
+	std::cout << norm << std::endl;
 }
