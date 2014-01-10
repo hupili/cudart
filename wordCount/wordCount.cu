@@ -6,7 +6,6 @@
 using namespace thrust;
 using namespace thrust::placeholders;
 
-// This example computes the number of words in a text sample. The algorithm counts the number of characters which start a new word, i.e. the number of characters where text[i] is an alphabetical character and text[i-1] is not an alphabetical character. determines whether the character is alphabetical
 int main(int argc, char* argv[])
 {
 	// Paragraph from 'The Raven' by Edgar Allan Poe. http://en.wikipedia.org/wiki/The_Raven
@@ -34,6 +33,6 @@ int main(int argc, char* argv[])
 	// If the first character is alphabetical, then it also begins a word.
 	if ('A' <= h[0] && h[0] <= 'z') ++wc;
 	
-	// Print.
+	// Print the word count.
 	std::cout << wc << std::endl;
 }

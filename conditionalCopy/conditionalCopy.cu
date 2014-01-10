@@ -4,7 +4,6 @@
 #include <thrust/device_vector.h>
 using namespace thrust;
 
-// This example computes indices for all the nonzero values in a sequence.
 int main(int argc, char* argv[])
 {
 	// Sequence of zero and nonzero values.
@@ -26,6 +25,6 @@ int main(int argc, char* argv[])
 		identity<int>()
 	);
 
-	// Print result.
+	// Print the indices.
 	thrust::copy(indices.begin(), indices_end, std::ostream_iterator<int>(std::cout, "\n"));
 }

@@ -5,7 +5,6 @@
 using namespace thrust;
 using namespace thrust::placeholders;
 
-// This example computes the maximum squared difference between the elements of two vectors.
 int main(int argc, char* argv[])
 {
 	// Initialize two vectors.
@@ -23,9 +22,9 @@ int main(int argc, char* argv[])
     	b.begin(),            // Data range 2.
     	0,                    // Initial value for the reduction.
     	maximum<float>(),     // Binary operation used to reduce values.
-    	(_1 - _2) * (_1 - _2) // Squared difference.
+		(_1 - _2) * (_1 - _2) // Lambda expression to compute squared difference.
     );
 
-	// Print.
+	// Print the result.
     std::cout << max_squared_diff << std::endl;
 }

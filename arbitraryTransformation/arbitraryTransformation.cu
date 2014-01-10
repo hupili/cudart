@@ -4,7 +4,6 @@
 #include <thrust/iterator/zip_iterator.h>
 using namespace thrust;
 
-// This example shows how to implement an arbitrary transformation of at most 10 elements.
 struct functor
 {
 	template <typename Tuple>
@@ -63,7 +62,7 @@ int main(int argc, char* argv[])
 	// Print the output.
 	for (int i = 0; i < 5; ++i)
 	{
-		std::cout << A[i] << " + " << B[i] << " * " << C[i] << " = " << D[i]
+		std::cout << A[i] << " + " << B[i] << " * " << C[i] << " = " << D[i] << std::endl
 		          << A[i] << " + " << B[i] << " + " << C[i] << " = " << E[i] << std::endl;
 	}
 }

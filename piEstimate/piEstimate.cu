@@ -6,15 +6,6 @@
 #include <thrust/transform_reduce.h>
 using namespace thrust;
 
-// This example demonstrates a slightly more sophisticated technique
-// which ensures that the subsequences generated in each thread are
-// disjoint. To achieve this, we use a single common stream
-// of random numbers, but partition it among threads to ensure no overlap
-// of substreams. The substreams are generated procedurally using
-// default_random_engine's discard(n) member function, which skips
-// past n states of the RNG. This function is accelerated and executes
-// in O(lg n) time.
-
 struct estimate_pi : public unary_function<unsigned int,float>
 {
 	__device__

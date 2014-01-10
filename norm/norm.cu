@@ -6,7 +6,6 @@
 using namespace thrust;
 using namespace thrust::placeholders;
 
-// This example computes the norm of a vector. The norm is computed by squaring all numbers in the vector, summing the squares, and taking the square root of the sum of squares.
 int main(int argc, char* argv[])
 {
 	// Initialize host data.
