@@ -19,11 +19,14 @@ int main(int argc, char* argv[])
 	float norm2 = transform_reduce
 	(
 		d.begin(), d.end(), // Data range.
-		_1 * _1,    // Unary transform operation.
+		_1 * _1,            // Unary transform operation.
 		0,                  // Initial value of the reduction.
 		plus<float>()       // Binary operation used to reduce values.
 	);
 
+	// Compute norm.
+	float norm = std::sqrt(norm2);
+
 	// Print the norm.
-	std::cout << "norm = " << std::sqrt(norm2) << std::endl;
+	std::cout << "norm = " << norm << std::endl;
 }
