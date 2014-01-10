@@ -4,7 +4,7 @@
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 using namespace thrust;
-using namespace placeholders;
+using namespace thrust::placeholders;
 
 // This example computes the norm of a vector. The norm is computed by squaring all numbers in the vector, summing the squares, and taking the square root of the sum of squares.
 int main(int argc, char* argv[])
