@@ -8,3 +8,7 @@ conditionalCopy.o: conditionalCopy.cu
 
 clean:
 	rm -f conditionalCopy conditionalCopy.o
+
+omp:
+	g++ -I${CUDA_ROOT}/include -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP conditionalCopy.cpp -fopenmp
+
