@@ -1,4 +1,5 @@
 #include <thrust/iterator/counting_iterator.h>
+#include <thrust/count.h>
 #include <thrust/copy.h>
 #include <thrust/functional.h>
 #include <thrust/device_vector.h>
@@ -15,16 +16,24 @@ int main(int argc, char* argv[])
 	// Storage for the nonzero indices.
 	device_vector<int> indices(8);
 
-	// Compute indices of nonzero elements.
-	device_vector<int>::iterator indices_end = copy_if
+	//// Compute indices of nonzero elements.
+	//// http://thrust.github.io/doc/group__stream__compaction.html#ga36d9d6ed8e17b442c1fd8dc40bd515d5
+	//device_vector<int>::iterator indices_end = copy_if
+	//(
+	//	counting_iterator<int>(0),
+	//	counting_iterator<int>(8),
+	//	d.begin(),
+	//	indices.begin(),
+	//	identity<int>()
+	//);
+	//// Print the indices.
+	//thrust::copy(indices.begin(), indices_end, std::ostream_iterator<int>(std::cout, "\n"));
+
+	int c = count_if
 	(
-		counting_iterator<int>(0),
-		counting_iterator<int>(8),
 		d.begin(),
-		indices.begin(),
+		d.end(),
 		identity<int>()
 	);
-
-	// Print the indices.
-	thrust::copy(indices.begin(), indices_end, std::ostream_iterator<int>(std::cout, "\n"));
+	std::cout << c << std::endl;
 }
