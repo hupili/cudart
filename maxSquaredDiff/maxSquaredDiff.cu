@@ -25,6 +25,11 @@ int main(int argc, char* argv[])
 		(_1 - _2) * (_1 - _2) // Lambda expression to compute squared difference.
     );
 
+    //TODO:
+    //    When no placeholder of _2 is passed, degrade to transform_reduce.
+    //    An existing feature?
+    //    This is for performance sake.
+
 	// Print the result.
     std::cout << max_squared_diff << std::endl;
 }
