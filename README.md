@@ -1,3 +1,16 @@
+
+   * When no placeholder of `_2` is passed, degrade to `transform_reduce`.
+   An existing feature?
+   This is for performance sake,
+   just like partial specializations in c++ std library.
+   * It's said that `make_tuple` and `get` can support only 10 components.
+   Then we can write a more general version using "tuple of tuple".
+
+following original README.
+
+-----------
+
+
 CUDA Samples
 ============
 
