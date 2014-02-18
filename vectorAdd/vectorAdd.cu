@@ -1,10 +1,22 @@
 #include <stdio.h>
 
+// the following is called a "kernel"
+//void vectorAdd(const float *a, const float *b, float *c, int numElements)
 __global__ void vectorAdd(const float *a, const float *b, float *c, int numElements)
 {
+	// blockDim/ threadIdx is built-in vars, 3-dimensional (get .y, .z?)
+	// blockDim: number of threads in a block
+	// blockIdx: the block index
+	// threadIdx: the index of the thread within the block
+	// i: the global thread ID
+	// more about the sizes: http://stackoverflow.com/questions/16619274/cuda-griddim-and-blockdim
 	int i = blockDim.x * blockIdx.x + threadIdx.x;
 	if (i < numElements)
 	{
+		// Even if the condition evaluates to false, 
+		// this block will still be executed,
+		// just the result is not written back.
+		// When come to a branch, the thread will get a mask.
 		c[i] = a[i] + b[i];
 	}
 }
@@ -35,6 +47,7 @@ int main(int argc, char *argv[])
 	cudaMalloc((void **)&d_c, numBytes);
 
 	// Copy vectors a and b from host memory to device memory synchronously.
+	// synchronized operation
 	cudaMemcpy(d_a, h_a, numBytes, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_b, h_b, numBytes, cudaMemcpyHostToDevice);
 
@@ -43,9 +56,12 @@ int main(int argc, char *argv[])
 	int numBlocksPerGrid = (numElements + numThreadsPerBlock - 1) / numThreadsPerBlock;
 
 	// Invoke the kernel on device asynchronously.
+	// The following return immediately
 	vectorAdd<<<numBlocksPerGrid, numThreadsPerBlock>>>(d_a, d_b, d_c, numElements);
 
 	// Copy vector c from device memory to host memory synchronously.
+	// The following is synchronous.
+	// It will not execute until previous vectorAdd is finished.
 	cudaMemcpy(h_c, d_c, numBytes, cudaMemcpyDeviceToHost);
 
 	// Validate the result.

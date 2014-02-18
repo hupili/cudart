@@ -16,7 +16,9 @@ int main(int argc, char *argv[])
 	// Set the flag in order to allocate pinned host memory that is accessible to the device.
 	cudaSetDeviceFlags(cudaDeviceMapHost);
 
-	// Allocate pinned vectors a, b and c in host memory with the cudaHostAllocMapped flag so that they can be accessed by the device.
+	// Allocate **pinned** vectors a, b and c in host memory with the cudaHostAllocMapped flag so that they can be accessed by the device.
+	// In vectorAdd example, the host vectors are pageable.
+	// "pinned" means they always stay in memory.
 	float* h_a;
 	float* h_b;
 	float* h_c;
@@ -35,11 +37,15 @@ int main(int argc, char *argv[])
 	float* d_a;
 	float* d_b;
 	float* d_c;
+	// only pointer
 	cudaHostGetDevicePointer(&d_a, h_a, 0);
 	cudaHostGetDevicePointer(&d_b, h_b, 0);
 	cudaHostGetDevicePointer(&d_c, h_c, 0);
 
 	// Invoke the kernel on device asynchronously.
+	// implicit copy
+	// more advantage on integrated system
+	// http://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#data-transfer-between-host-and-device
 	vectorAdd<<<numBlocksPerGrid, numThreadsPerBlock>>>(d_a, d_b, d_c);
 
 	// Wait for the device to finish.
