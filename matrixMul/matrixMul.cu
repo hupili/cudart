@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <time.h>
 
+// utilize global memory --> shared memory to accelerate matrix multiplication
+
 void naiveMultiply(float *a, float *b, float *c, int M, int N, int w)
 {
 	for (int row = 0; row < M; ++row)
@@ -15,6 +17,7 @@ void naiveMultiply(float *a, float *b, float *c, int M, int N, int w)
 	}
 }
 
+// This TILE_DIM must be known at compile time
 template <int TILE_DIM> __global__ void simpleMultiply(float *a, float *b, float *c, int N)
 {
 	int row = blockIdx.y * blockDim.y + threadIdx.y;
@@ -68,6 +71,7 @@ template <int TILE_DIM> __global__ void sharedABUnrolledMultiply(float *a, float
 	aTile[threadIdx.y][threadIdx.x] = a[row*TILE_DIM+threadIdx.x];
 	bTile[threadIdx.y][threadIdx.x] = b[threadIdx.y*N+col];
 	__syncthreads();
+// unroll: compile the loop into TILE_DIM operations
 // Unrolling is possible provided that TILE_DIM is known at compile time.
 #pragma unroll
 	for (int i = 0; i < TILE_DIM; ++i)
@@ -121,6 +125,7 @@ int main(int argc, char *argv[])
 	cudaMemcpy(d_b, h_b, numBytesB, cudaMemcpyHostToDevice);
 
 	// Warm up the device.
+	// dim3? why not dim2?
 	dim3 numThreadsPerBlock(w, w);
 	dim3 numBlocksPerGrid(N / numThreadsPerBlock.x, M / numThreadsPerBlock.y);
 	simpleMultiply<w><<<numBlocksPerGrid, numThreadsPerBlock>>>(d_a, d_b, d_c, N);

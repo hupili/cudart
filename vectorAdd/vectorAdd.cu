@@ -13,6 +13,10 @@ __global__ void vectorAdd(const float *a, const float *b, float *c, int numEleme
 	int i = blockDim.x * blockIdx.x + threadIdx.x;
 	if (i < numElements)
 	{
+		// Even if the condition evaluates to false, 
+		// this block will still be executed,
+		// just the result is not written back.
+		// When come to a branch, the thread will get a mask.
 		c[i] = a[i] + b[i];
 	}
 }
