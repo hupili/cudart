@@ -8,7 +8,11 @@ __global__ void iota(float *a)
 
 int main(int argc, char *argv[])
 {
+	// this will not give error
 	int numElements = 1e+8;
+	// this gives OOM error
+	// actually this gives warning even during compilation.
+	int numElements = 1e+10;
 
 	// Allocate vector a in device memory.
 	float *d_a;
