@@ -32,9 +32,11 @@ int main(int argc, char *argv[])
 	}
 
 	// Create events to record timing data.
+	// Events are like bookmarks.
 	cudaEvent_t beg, end;
 	cudaEventCreate(&beg);
 	cudaEventCreate(&end);
+
 
 	// Record an event in stream 0 before kernel invocations.
 	cudaEventRecord(beg, 0);

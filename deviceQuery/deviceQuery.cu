@@ -13,10 +13,12 @@ int main(int argc, char *argv[])
 
 	// Print some properties.
 	// Refer to driver_types.h for a complete list of properties.
-	printf("name: %s\n", deviceProp.name);
+	// K20M
+	printf("name: %s\n", deviceProp.name); 
 	printf("major: %d\n", deviceProp.major);
 	printf("minor: %d\n", deviceProp.minor);
-	printf("multiProcessorCount: %d\n", deviceProp.multiProcessorCount);
+	// # of SMX
+	printf("multiProcessorCount: %d\n", deviceProp.multiProcessorCount); 
 	printf("totalGlobalMem: %lu B = %lu MB\n", deviceProp.totalGlobalMem, deviceProp.totalGlobalMem / 1048576);
 	printf("sharedMemPerBlock: %lu B = %lu KB\n", deviceProp.sharedMemPerBlock, deviceProp.sharedMemPerBlock / 1024);
 	printf("totalConstMem: %lu B = %lu KB\n", deviceProp.totalConstMem, deviceProp.totalConstMem / 1024);

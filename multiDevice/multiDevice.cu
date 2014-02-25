@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
 		int numElementsCurrentDevice = avgElementsPerDevice + (i < sprElements);
 
 		// Set device to be used for GPU executions.
+		// highlight:
 		cudaSetDevice(i);
 
 		// Allocate vectors a, b and c in device memory.
