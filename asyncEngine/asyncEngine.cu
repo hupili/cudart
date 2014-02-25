@@ -19,6 +19,8 @@ int main(int argc, char *argv[])
 	float *h_a;
 	float *h_b;
 	float *h_c;
+	// pinned memory.
+	// CUDA async API must use pinned memory.
 	cudaMallocHost((void **)&h_a, numBytes);
 	cudaMallocHost((void **)&h_b, numBytes);
 	cudaMallocHost((void **)&h_c, numBytes);
@@ -29,6 +31,9 @@ int main(int argc, char *argv[])
 		h_a[i] = rand() / (float)RAND_MAX;
 		h_b[i] = rand() / (float)RAND_MAX;
 	}
+
+	// stream, is like a "queue"
+	// In previous examples, the queue is initialized at the first API call
 
 	// Initialize a number of CUDA streams.
 	int numStreams = 8;
@@ -58,6 +63,7 @@ int main(int argc, char *argv[])
 		cudaMalloc((void **)&d_c[i], numBytesCurrentStream);
 
 		// Copy vectors a and b from host memory to device memory asynchronously.
+		// enqueue two commands
 		cudaMemcpyAsync(d_a[i], h_a + offset, numBytesCurrentStream, cudaMemcpyHostToDevice, streams[i]);
 		cudaMemcpyAsync(d_b[i], h_b + offset, numBytesCurrentStream, cudaMemcpyHostToDevice, streams[i]);
 
@@ -71,6 +77,10 @@ int main(int argc, char *argv[])
 		// The 3rd argument is of type size_t and specifiesthe number of bytes in shared memory that is dynamically allocated per block for this call in addition to the statically allocated memory. It is an optional argument which defaults to 0.
 		// The 4th argument is of type cudaStream_t and specifies the associated stream. It is an optional argument which defaults to 0.
 		vectorAdd<<<numBlocksPerGrid, numThreadsPerBlock, 0, streams[i]>>>(d_a[i], d_b[i], d_c[i], numElementsCurrentStream);
+		// shared memory.
+		// in the matrix multiplication sample, we have the shared memory via __share__
+
+		// NOTE: kernel function is always async
 
 		// Copy vector c from device memory to host memory asynchronously.
 		cudaMemcpyAsync(h_c + offset, d_c[i], numBytesCurrentStream, cudaMemcpyDeviceToHost, streams[i]);
@@ -78,6 +88,10 @@ int main(int argc, char *argv[])
 		// Increase offset to point to the next portion of data.
 		offset += numElementsCurrentStream;
 	}
+
+	// stream can potentially accelerate the program
+	// e.g. while one is executing, another copy data.
+	// This makes better use of computation resources and data transfer buses.
 
 	// Wait for the device to finish.
 	cudaDeviceSynchronize();

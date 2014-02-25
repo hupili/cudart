@@ -24,11 +24,18 @@ int main(int argc, char *argv[])
 	omp_set_num_threads(numDevices);
 
 	// All variables declared inside an "omp parallel" scope are local to each CPU thread.
+	// highlight:
 	#pragma omp parallel
 	{
+		// This block is multi-threaded by CPU
+		// So we use sync operations in it
+		// CPU will switch when one thread blocks
+
 		// Get the number of CPU threads and the thread number of the current CPU thread.
 		// 0 <= threadNum <= numThreads - 1
 		int numThreads = omp_get_num_threads();
+		// the thread ID..
+		// what bad names for the two API...
 		int threadNum = omp_get_thread_num();
 
 		// Set device to be used for GPU executions.
